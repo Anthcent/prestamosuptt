@@ -28,26 +28,52 @@ $result = $conn->query($get_personal_query);
 include '../header/header.html';
 ?>
 
-<div class="container mt-2">
+<style>
+        /* Estilo personalizado para el select */
+        .styled-select {
+            display: block;
+            width: 100%;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+
+        /* Estilo cuando se enfoca */
+        .styled-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 .25rem rgba(0, 123, 255, .25);
+            outline: 0;
+        }
+
+        /* Estilo cuando se pasa el mouse */
+        .styled-select:hover {
+            border-color: #b8c2cc;
+        }
+    </style>
     
 
-<div class="bd-example">
-     
 
-
-<div class="conatiner-fluid content-inner mt-1 py-0">
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="card">
-            <div class="card-header d-flex justify-content-between">
-               <div class="header-title">
-                  <h4 class="card-title">Préstamos de Articulos</h4>
-               </div>
-               <a href="../login/logout.php" class="btn btn-primary">Regresar/Cerrar sesión</a>
-            </div>
-            <div class="card-body">
-               <div class="table-responsive">
-                  <table id="table" class="table table-striped" data-toggle="data-table">
+            <div class="container-fluid">
+            <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Registro de Prestamo</h6>
+                        </div>
+                        <div class="card-body py-3">
+                        <form action="reporte.php" method="post">
+                        <a href="../login/logout.php" class="btn btn-primary">Regresar/Cerrar sesión</a>
+    </form>
+                            
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                  <table id="table" class="table table-bordered" data-toggle="data-table" width="100%" cellspacing="0">
                      <thead>
                         <tr>
                         <th>ID</th>
@@ -59,14 +85,14 @@ include '../header/header.html';
             <th>Fecha de Devolución</th>
             <th>Estado</th>
             <th>Estado</th>
-            
+            <th>Acciones</th>
                         </tr>
                      </thead>
                      <tbody>
                         <!-- Obtener y mostrar los préstamos de la base de datos -->
         <?php
        
-       $result = $conn->query("SELECT prestamos.id, prestamos.persona_nombre, personal.cargo, prestamos.producto_id, prestamos.cantidad_prestada, prestamos.fecha_entrega, prestamos.fecha_devolucion, prestamos.estado FROM prestamos INNER JOIN personal ON prestamos.persona_id = personal.id WHERE prestamos.estado = 'Prestado'");
+       $result = $conn->query("SELECT prestamos.id, prestamos.persona_nombre, personal.cargo, prestamos.producto_id, prestamos.cantidad_prestada, prestamos.fecha_entrega, prestamos.fecha_devolucion, prestamos.estado FROM prestamos INNER JOIN personal ON prestamos.persona_id = personal.id");
        while ($row = $result->fetch_assoc()) {
            echo "<tr>";
            echo "<td>" . $row['id'] . "</td>";
@@ -89,16 +115,21 @@ include '../header/header.html';
 
            // Verificar si la fecha actual está entre la fecha de entrega y la fecha de devolución
            if ($fechaActual >= $fechaEntrega && $fechaActual <= $fechaDevolucion) {
-               echo "<td>ACTIVO</td>";
+               echo "<td>Activo</td>";
            } elseif ($fechaActual > $fechaDevolucion) {
-               echo "<td>CADUCADO</td>";
+               echo "<td>Préstamo terminado</td>";
            } else {
                echo "<td>Préstamo en curso</td>";
            }
 
            echo "<td>" . $row['estado'] . "</td>";
 
-          
+           // Mostrar el botón de devolución solo si el estado es 'Prestado'
+           if ($row['estado'] == 'Prestado') {
+               echo "<td><a href='devolver.php?id=" . $row['id'] . "' class='btn btn-warning'>Devolver</a></td>";
+           } else {
+               echo "<td></td>";
+           }
 
            echo "</tr>";
        }
@@ -115,7 +146,7 @@ include '../header/header.html';
             <th>Fecha de Devolución</th>
             <th>Estado</th>
             <th>Estado</th>
-           
+            <th>Acciones</th>
                         </tr>
                      </tfoot>
                   </table>
@@ -124,24 +155,7 @@ include '../header/header.html';
          </div>
       </div>
    </div>
-      </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- <!-- Library Bundle Script -->
-<script>    document.getElementById("producto_id").addEventListener("change", function () {
+   <script>    document.getElementById("producto_id").addEventListener("change", function () {
         var cantidadDisponible = this.options[this.selectedIndex].getAttribute('data-disponible');
         document.getElementById("cantidad_disponible").innerText = "Cantidad Disponible: " + cantidadDisponible;
     });
@@ -176,39 +190,18 @@ document.getElementById("persona_id").addEventListener("change", function () {
     cargoField.value = selectedOption.getAttribute("data-cargo");
 });
 </script>
-<script>
+   <script>
     $(document).ready(function() {
         $('.table').DataTable();
     });
 </script>
 
- <script src="../assets/js/core/libs.min.js"></script>
-    
- <!-- External Library Bundle Script -->
- <script src="../assets/js/core/external.min.js"></script>
- 
- <!-- Widgetchart Script -->
- <script src="../assets/js/charts/widgetcharts.js"></script>
- 
- <!-- mapchart Script -->
- <script src="../assets/js/charts/vectore-chart.js"></script>
- <script src="../assets/js/charts/dashboard.js" ></script>
- 
- <!-- fslightbox Script -->
- <script src="../assets/js/plugins/fslightbox.js"></script>
- 
- <!-- Settings Script -->
- <script src="../assets/js/plugins/setting.js"></script>
- 
- <!-- Slider-tab Script -->
- <script src="../assets/js/plugins/slider-tabs.js"></script>
- 
- <!-- Form Wizard Script -->
- <script src="../assets/js/plugins/form-wizard.js"></script>
- 
- <!-- AOS Animation Plugin-->
- 
- <!-- App Script -->
- <script src="../assets/js/hope-ui.js" defer></script>
+<?php
+// Archivo: devolver.php
+
+include '../footer/footernav.html';
+?>
+
 </body>
+
 </html>
